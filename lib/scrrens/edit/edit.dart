@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_list/main.dart';
 import '../../data/data.dart';
 import '../../main.dart';
+import '../../data/repo/repository.dart';
 
 const taskBoxName = 'tasks';
 
@@ -18,7 +20,8 @@ class EditTaskScreen extends StatefulWidget {
 }
 
 class _EditTaskScreenState extends State<EditTaskScreen> {
-  late TextEditingController _controller = TextEditingController(text: widget.task.name);
+  late TextEditingController _controller =
+      TextEditingController(text: widget.task.name);
 
   @override
   Widget build(BuildContext context) {
@@ -30,21 +33,17 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         backgroundColor: themeData.colorScheme.surface,
         foregroundColor: themeData.colorScheme.onSurface,
         title: Text(
-          'Edit Task',
+          widget.task.isInBox ? 'Edit Task' : 'Make Task',
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-
           widget.task.name = _controller.text;
           widget.task.priority = widget.task.priority;
-          if (widget.task.isInBox) {
-            widget.task.save();
-          } else {
-            final Box<Task> box = Hive.box(taskBoxName);
-            box.add(widget.task);
-          }
+          final repository =
+              Provider.of<Repository<Task>>(context, listen: false);
+          repository.createOrUpdate(widget.task);
           Navigator.of(context).pop();
         },
         label: Row(
@@ -201,12 +200,12 @@ class _PriorityCheckBoxShape extends StatelessWidget {
         ),
         child: value
             ? Icon(
-          CupertinoIcons.check_mark,
-          color: Theme.of(context).colorScheme.surface,
-          size: 12,
-        )
+                CupertinoIcons.check_mark,
+                color: Theme.of(context).colorScheme.surface,
+                size: 12,
+              )
             : null,
       ),
     );
   }
-}
+ }

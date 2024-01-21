@@ -2,10 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_list/data/data.dart';
+import 'package:todo_list/data/repo/repository.dart';
+import 'package:todo_list/data/source/hive_task_source.dart';
 import 'package:todo_list/scrrens/edit/home/home.dart';
 import 'package:todo_list/widgets.dart';
 import 'scrrens/edit/edit.dart';
+import 'package:provider/provider.dart';
 
 const taskBoxName = 'tasks';
 
@@ -14,7 +18,13 @@ void main() async {
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(PriorityAdapter());
   await Hive.openBox<Task>(taskBoxName);
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider<Repository<Task>>(
+      create: (context) => Repository<Task>(
+            HiveTaskDataSource(
+              Hive.box(taskBoxName),
+            ),
+          ),
+      child: MyApp()));
 }
 
 const Color primaryColor = Color(0xff794cff);

@@ -1,20 +1,27 @@
+import 'package:flutter/cupertino.dart';
+
 import '../source/source.dart';
 
-class Repository<T> implements DataSource<T>{
+class Repository<T> extends ChangeNotifier implements DataSource<T>{
   final DataSource<T> localDataSource;
   Repository(this.localDataSource);
   @override
-  Future<T> createOrUpdate(T data) {
-    return localDataSource.createOrUpdate(data);
+  Future<T> createOrUpdate(T data) async{
+    final T result = await localDataSource.createOrUpdate(data);
+    notifyListeners();
+    return result;
   }
 
   @override
-  Future<void> delete(T data) {
+  Future<void> delete(T data) async{
+    notifyListeners();
+
     return localDataSource.delete(data);
   }
 
   @override
-  Future<void> deleteAll() {
+  Future<void> deleteAll() async{
+    notifyListeners();
     return localDataSource.deleteAll();
   }
 
@@ -30,7 +37,7 @@ class Repository<T> implements DataSource<T>{
 
   @override
   Future<List<T>> getAll({String searchKeyword=''}){
-    return getAll(searchKeyword: searchKeyword);
+    return localDataSource.getAll(searchKeyword: searchKeyword);
   }
 
 }
